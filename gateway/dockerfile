@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/windows/servercore:1909
+ENV VERSION 1.16.1
+
+SHELL ["powershell", "-command"]
+RUN Invoke-WebRequest -Uri https://nginx.org/download/nginx-$ENV:VERSION.zip -OutFile c:\nginx-$ENV:VERSION.zip; \
+ 	Expand-Archive -Path C:\nginx-$ENV:VERSION.zip -DestinationPath C:\ -Force; \
+ 	Remove-Item -Path c:\nginx-$ENV:VERSION.zip -Confirm:$False; \
+ 	Rename-Item -Path nginx-$ENV:VERSION -NewName nginx; \
+    New-Item -Path c:\nginx\conf -Name site-confs -ItemType directory; \
+    New-Item -Path c:\nginx\conf -Name proxy-confs -ItemType directory;
+
+COPY nginx.conf c:/nginx/conf/nginx.conf
+COPY default c:/nginx/conf/site-confs/default
+COPY docker-entrypoint.ps1 c:/nginx/docker-entrypoint.ps1
+
+WORKDIR /nginx
+EXPOSE 80
+ENTRYPOINT ["powershell", "./docker-entrypoint.ps1"]
+CMD ["-command", "start"]

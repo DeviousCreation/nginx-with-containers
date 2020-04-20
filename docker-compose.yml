@@ -1,0 +1,21 @@
+version: '3'
+services:
+  gateway:
+    container_name: cluster-gateway
+    build:
+      context: ./gateway
+      dockerfile: dockerfile
+    volumes:
+      - '.\gateway\proxies:c:\nginx\conf\proxy-confs\'
+    ports:
+      - '80:80'
+    networks:
+      - cluster
+  node-alpha:
+    container_name: cluster-node-alpha
+    image: mcr.microsoft.com/dotnet/core/samples:aspnetapp-nanoserver-1903
+    networks:
+      - cluster
+networks:
+  cluster:
+    external: true
